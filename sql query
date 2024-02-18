@@ -88,8 +88,91 @@ SELECT location, COUNT(*) AS employee_count
 FROM hr
 GROUP BY location;
 
+Q5)What is the average length of employment for employees who have been terminated?
+SELECT AVG(DATEDIFF(day, hire_date, termdate)) AS average_employment_length
+FROM hr
+WHERE termdate IS NOT NULL;
+
+Q6)How does the gender distribution vary across departments and job titles?
+SELECT department, --jobtitle,
+gender, COUNT(*) AS employee_count
+FROM hr
+GROUP BY department, --jobtitle,
+gender
+order by department
+
+Q7)What is the distribution of job titles across the company?
+SELECT jobtitle, COUNT(*) as count
+FROM hr
+WHERE age >= 18
+GROUP BY jobtitle
+ORDER BY jobtitle DESC;
+
+Q8)Which department has the highest turnover rate?(MİSTAKE?)
+SELECT 
+    department, 
+    COUNT(*) as total_count, 
+    SUM(CASE WHEN termdate IS NOT NULL THEN 1 ELSE 0 END) as terminated_count, 
+    SUM(CASE WHEN termdate IS NULL THEN 1 ELSE 0 END) as active_count,
+    (SUM(CASE WHEN termdate IS NOT NULL THEN 1 ELSE 0 END) / CAST(COUNT(*) AS float)) AS termination_rate
+FROM 
+    hr
+WHERE 
+    age >= 18
+GROUP BY 
+    department
+ORDER BY 
+    termination_rate DESC;
+
+Q9)What is the distribution of employees across locations by state?
+SELECT location_state, COUNT(*) as count
+FROM hr
+GROUP BY location_state
+ORDER BY count DESC;
+
+Q10)How has the company's employee count changed over time based on hire and term dates?
+SELECT 
+    YEAR(hire_date) AS year, 
+    COUNT(*) AS hires, 
+    SUM(CASE WHEN termdate IS NOT NULL THEN 1 ELSE 0 END) AS terminations, 
+    COUNT(*) - SUM(CASE WHEN termdate IS NOT NULL THEN 1 ELSE 0 END) AS net_change,
+    ROUND(((COUNT(*) - SUM(CASE WHEN termdate IS NOT NULL THEN 1 ELSE 0 END)) / CAST(COUNT(*) AS float) * 100), 2) AS net_change_percent
+FROM 
+    hr
+GROUP BY 
+    YEAR(hire_date)
+ORDER BY 
+    YEAR(hire_date) ASC;
+
+Q11)What is the tenure distribution for each department?
+How long do employees work in each department before they leave or are made to leave?
+
+SELECT 
+    department,
+    ROUND(AVG(DATEDIFF(YEAR, hire_date, COALESCE(termdate, GETDATE()))), 2) AS ortalama_hizmet_süresi_yıl,
+    MIN(DATEDIFF(MONTH, hire_date, COALESCE(termdate, GETDATE()))) AS en_düşük_hizmet_süresi_ay,
+    MAX(DATEDIFF(YEAR, hire_date, COALESCE(termdate, GETDATE()))) AS en_yüksek_hizmet_süresi_yıl
+FROM 
+    hr
+GROUP BY 
+    department;
 
 
+
+-----
+
+Summary of Findings
+There are more male employees
+White race is the most dominant while Native Hawaiian and American Indian are the least dominant.
+The youngest employee is 20 years old and the oldest is 57 years old
+5 age groups were created (18-24, 25-34, 35-44, 45-54, 55-64). A large number of employees were between 25-34 followed by 35-44 while the smallest group was 55-64.
+A large number of employees work at the headquarters versus remotely.
+The average length of employment for terminated employees is around 7 years.
+The gender distribution across departments is fairly balanced but there are generally more male than female employees.
+The Marketing department has the highest turnover rate followed by Training. The least turn over rate are in the Research and development, Support and Legal departments.
+A large number of employees come from the state of Ohio.
+The net change in employees has increased over the years.
+The average tenure for each department is about 8 years with Legal and Auditing having the highest and Services, Sales and Marketing having the lowest.
 
 
 
